@@ -1,23 +1,66 @@
+import time
+stime = time.time()
+
 import struct as st
 import numpy as np
+import codecs
 
-filename = {'images' : 'train-images.idx3-ubyte' ,'labels' : 'train-labels.idx1-ubyte'}
-train_imagesfile = open(filename['images'],'rb')
+filename = {'images' : 'train-images-idx3-ubyte' ,'labels' : 'train-labels-idx1-ubyte'}
 
-train_imagesfile.seek(0)
-magic = st.unpack('>4B',train_imagesfile.read(4))
+labels_array = np.array([])
 
-Img = st.unpack('>I',train_imagesfile.read(4))[0] #num of images
-nR = st.unpack('>I',train_imagesfile.read(4))[0] #num of rows
-nC = st.unpack('>I',train_imagesfile.read(4))[0] #num of column
+data_types = {
+        0x08: ('ubyte', 'B', 1),
+        0x09: ('byte', 'b', 1),
+        0x0B: ('>i2', 'h', 2),
+        0x0C: ('>i4', 'i', 4),
+        0x0D: ('>f4', 'f', 4),
+        0x0E: ('>f8', 'd', 8)}
 
-images_array = np.zeros((nImg,nR,nC))
+#types_of_encoding = ["uft8", "cp1252"]
+for name in filename.keys():
+ 	if name == 'images':
+ 		imagesfile = open(filename[name],'r+', encoding="cp1252", errors = 'ignore')
+ 	if name == 'labels':
+ 		labelsfile = open(filename[name],'r+', encoding="cp1252", errors = 'ignore')
 
+#imagesfile = open("train-images-idx3-ubyte",'r+', errors = 'ignore')
 
-#‘B’ is used since it is of ‘unsigned char’ C type and ‘integer’
-#Python type and has standard size 1 as mentioned in the official documentation of struct.
+imagesfile.seek(0)
+print(type(imagesfile.read(4)) , 'TESTTESTESTEST')
+bytes1 = bytes(imagesfile.read(4), 'utf-8')
+print(type(bytes1))
+print(bytes1)
+print(st.unpack('<4B', bytes(imagesfile.read(4), 'utf-8')))
 
-#‘>’ is used since the data is in MSB first (high endian) format
-#used by most non-Intel processors, as mentioned in their original website.
-nBytesTotal = nImg*nR*nC*1 #since each pixel data is 1 byte
-images_array = 255 - np.asarray(st.unpack('>'+'B'*nBytesTotal,imagesfile.read(nBytesTotal))).reshape((nImg,nR,nC))
+# magic = st.unpack('<4B',bytes(imagesfile.read(4), 'utf-8'))
+#
+# if(magic[0] and magic[1]) or (magic[2] not in data_types):
+# 	raise ValueError("File Format not correct")
+#
+# nDim = magic[3]
+# print ("Data is ",nDim,"-D")
+#
+# #offset = 0004 for number of images
+# #offset = 0008 for number of rows
+# #offset = 0012 for number of columns
+# #32-bit integer (32 bits = 4 bytes)
+# imagesfile.seek(4)
+# nImg = st.unpack('>I',imagesfile.read(4))[0] #num of images/labels
+# nR = st.unpack('>I',imagesfile.read(4))[0] #num of rows
+# nC = st.unpack('>I',imagesfile.read(4))[0] #num of columns
+# nBytes = nImg*nR*nC
+# labelsfile.seek(8) #Since no. of items = no. of images and is already read
+# print ("no. of images :: ",nImg)
+# print ("no. of rows :: ",nR)
+# print ("no. of columns :: ",nC)
+#
+# #Read all data bytes at once and then reshape
+# images_array = 255 - np.asarray(st.unpack('>'+'B'*nBytes,imagesfile.read(nBytes))).reshape((nImg,nR,nC))
+# labels_array = np.asarray(st.unpack('>'+'B'*nImg,labelsfile.read(nImg))).reshape((nImg,1))
+#
+# print (labels_array)
+# print (labels_array.shape)
+# print (images_array.shape)
+#
+# print ("Time of execution : %s seconds" % str(time.time()-stime))
